@@ -1,11 +1,20 @@
 package main
 
 import (
+	"bytes"
+	"errors"
+	"flag"
 	"fmt"
 	"io"
 	"os"
+	"os/exec"
 
 	"github.com/charmbracelet/glamour"
+	"golang.org/x/term"
+)
+
+var (
+	flagPager = flag.Bool("p", false, "send output to a pager")
 )
 
 func main() {
@@ -16,10 +25,11 @@ func main() {
 }
 
 func Main() (err error) {
-	inReader := os.Stdin
+	flag.Parse()
 
-	if len(os.Args) == 2 {
-		inReader, err = os.Open(os.Args[1])
+	inReader := os.Stdin
+	if len(flag.Args()) > 0 {
+		inReader, err = os.Open(flag.Arg(0))
 		if err != nil {
 			return err
 		}
@@ -30,9 +40,18 @@ func Main() (err error) {
 		return err
 	}
 
+	outFd := int(os.Stdout.Fd())
+	width := 80
+	if term.IsTerminal(outFd) {
+		width, _, err = term.GetSize(int(os.Stdout.Fd()))
+		if err != nil {
+			return err
+		}
+	}
+
 	r, _ := glamour.NewTermRenderer(
 		glamour.WithEnvironmentConfig(),
-		glamour.WithWordWrap(80),
+		glamour.WithWordWrap(width),
 	)
 
 	out, err := r.Render(string(in))
@@ -40,7 +59,27 @@ func Main() (err error) {
 		return err
 	}
 
-	fmt.Print(out)
+	if flagPager != nil && *flagPager {
+		err = page(out)
+	} else {
+		fmt.Print(out)
+	}
+
+	return err
+}
+
+func page(out string) error {
+	var stderr bytes.Buffer
+
+	cmd := exec.Command("less", "-R", "-F")
+	cmd.Stdin = bytes.NewBuffer([]byte(out))
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = &stderr
+
+	err := cmd.Run()
+	if err != nil {
+		return errors.Join(err, fmt.Errorf("stderr: %s", stderr.String()))
+	}
 
 	return nil
 }

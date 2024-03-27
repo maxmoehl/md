@@ -2,7 +2,10 @@ module moehl.dev/md
 
 go 1.22.1
 
-require github.com/charmbracelet/glamour v0.7.0
+require (
+	github.com/charmbracelet/glamour v0.7.0
+	golang.org/x/term v0.18.0
+)
 
 require (
 	github.com/alecthomas/chroma/v2 v2.8.0 // indirect
@@ -21,5 +24,5 @@ require (
 	github.com/yuin/goldmark v1.5.4 // indirect
 	github.com/yuin/goldmark-emoji v1.0.2 // indirect
 	golang.org/x/net v0.17.0 // indirect
-	golang.org/x/sys v0.13.0 // indirect
+	golang.org/x/sys v0.18.0 // indirect
 )
