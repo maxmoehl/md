@@ -15,17 +15,17 @@ func main() {
 	}
 }
 
-func Main() error {
-	if len(os.Args) != 2 {
-		return fmt.Errorf("usage: md PATH")
+func Main() (err error) {
+	inReader := os.Stdin
+
+	if len(os.Args) == 2 {
+		inReader, err = os.Open(os.Args[1])
+		if err != nil {
+			return err
+		}
 	}
 
-	inFile, err := os.Open(os.Args[1])
-	if err != nil {
-		return err
-	}
-
-	in, err := io.ReadAll(inFile)
+	in, err := io.ReadAll(inReader)
 	if err != nil {
 		return err
 	}
