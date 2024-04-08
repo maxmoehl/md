@@ -14,9 +14,10 @@ import (
 )
 
 var (
-	flagDebug = flag.Bool("d", false, "print debug output")
-	flagPager = flag.Bool("p", false, "send output to a pager")
-	flagWidth = flag.Int("w", 0, "specify a maximum width")
+	flagDebug    = flag.Bool("d", false, "print debug output")
+	flagNewLines = flag.Bool("n", false, "preserve newlines")
+	flagPager    = flag.Bool("p", false, "send output to a pager")
+	flagWidth    = flag.Int("w", 0, "specify a maximum width")
 )
 
 func debugf(format string, a ...any) {
@@ -66,7 +67,10 @@ func Main() (err error) {
 
 	opts := []glamour.TermRendererOption{
 		glamour.WithEnvironmentConfig(),
-		glamour.WithPreservedNewLines(),
+	}
+
+	if *flagNewLines {
+		opts = append(opts, glamour.WithPreservedNewLines())
 	}
 
 	if width > 0 {
