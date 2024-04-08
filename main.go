@@ -15,6 +15,7 @@ import (
 
 var (
 	flagPager = flag.Bool("p", false, "send output to a pager")
+	flagWidth = flag.Int("w", 0, "specify a maximum width")
 )
 
 func main() {
@@ -41,7 +42,7 @@ func Main() (err error) {
 	}
 
 	outFd := int(os.Stdout.Fd())
-	width := 80
+	width := *flagWidth
 	if term.IsTerminal(outFd) {
 		width, _, err = term.GetSize(int(os.Stdout.Fd()))
 		if err != nil {
@@ -49,10 +50,24 @@ func Main() (err error) {
 		}
 	}
 
-	r, _ := glamour.NewTermRenderer(
+	// Limit width to the specified value.
+	if *flagWidth > 0 && width > *flagWidth {
+		width = *flagWidth
+	}
+
+	opts := []glamour.TermRendererOption{
 		glamour.WithEnvironmentConfig(),
-		glamour.WithWordWrap(width),
-	)
+		glamour.WithPreservedNewLines(),
+	}
+
+	if width > 0 {
+		opts = append(opts, glamour.WithWordWrap(width))
+	}
+
+	r, err := glamour.NewTermRenderer(opts...)
+	if err != nil {
+		return err
+	}
 
 	out, err := r.Render(string(in))
 	if err != nil {
