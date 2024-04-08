@@ -14,9 +14,16 @@ import (
 )
 
 var (
+	flagDebug = flag.Bool("d", false, "print debug output")
 	flagPager = flag.Bool("p", false, "send output to a pager")
 	flagWidth = flag.Int("w", 0, "specify a maximum width")
 )
+
+func debugf(format string, a ...any) {
+	if *flagDebug {
+		fmt.Fprintf(os.Stdout, "debug: "+format+"\n", a...)
+	}
+}
 
 func main() {
 	err := Main()
@@ -49,11 +56,13 @@ func Main() (err error) {
 			return err
 		}
 	}
+	debugf("term width: %d", width)
 
 	// Limit width to the specified value.
 	if *flagWidth > 0 && width > *flagWidth {
 		width = *flagWidth
 	}
+	debugf("final width: %d", width)
 
 	opts := []glamour.TermRendererOption{
 		glamour.WithEnvironmentConfig(),
