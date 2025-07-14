@@ -1,4 +1,4 @@
-module moehl.dev/md
+module go.moehl.dev/md
 
 go 1.22.1
 
