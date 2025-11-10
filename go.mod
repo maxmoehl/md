@@ -39,3 +39,5 @@ require (
 	golang.org/x/text v0.30.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
+
+retract v1.4.1 // Broken dependencies cause build failures.
